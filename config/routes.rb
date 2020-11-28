@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   #Omniauth Login Route
   get "/auth/github", as: "github_login"
-  get "/auth/:provider/callback", to: "user#create", as: "omniauth_callback"
+  get "/auth/:provider/callback", to: "users#create" # as: "omniauth_callback"
 
   root "works#root"
   # get "/login", to: "users#login_form", as: "login"
@@ -13,5 +13,5 @@ Rails.application.routes.draw do
   resources :works
   post "/works/:id/upvote", to: "works#upvote", as: "upvote"
 
-  resources :users, only: [:index, :show]
+  resources :users, only: [:index, :show, :create, :destroy]
 end
