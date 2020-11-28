@@ -17,20 +17,24 @@ class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
 
-  # def setup
-  #   OmniAuth.config.test_mode = true
-  # end
+  def setup
+    # Once you have enabled test mode, all requests
+    # to OmniAuth will be short circuited to use the mock authentication hash.
+    # A request to /auth/provider will redirect immediately to /auth/provider/callback.
+    OmniAuth.config.test_mode = true
+  end
 
-  # def mock_auth_hash(user)
-  #   return {
-  #     provider: user.provider,
-  #     uid: user.uid,
-  #     info: {
-  #       email: user.email,
-  #       nickname: user.username
-  #     }
-  #   }
-  # end
+  def mock_auth_hash(user)
+    return {
+      provider: user.provider,
+      uid: user.uid,
+      info: {
+        email: user.email,
+        nickname: user.username
+        avatar: user.avatar
+      }
+    }
+  end
 
   # def perform_login(user = nil)
   #   user ||= User.first
