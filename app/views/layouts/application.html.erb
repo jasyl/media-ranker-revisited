@@ -46,10 +46,9 @@
         <% else %>
 
         <li class="nav-item app-header__nav_item">
-          <%= link_to "Log In", login_path, class: "btn btn-primary" %>
+          <li><%= link_to "Log In With Github", github_login_path, class: "btn btn-primary" %></li>
         </li>
         <% end %>
-
       </ul>
     </nav>
   </header>
