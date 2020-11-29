@@ -31,7 +31,7 @@ class ActiveSupport::TestCase
       info: {
         email: user.email,
         nickname: user.username,
-        avatar: user.avatar
+        image: user.avatar
       }
     }
   end
