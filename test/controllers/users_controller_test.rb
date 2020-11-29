@@ -5,14 +5,13 @@ describe UsersController do
   describe "auth_callback" do
     it "logs in an existing user and redirects to the root path" do
       user = users(:dan)
-
       expect {
         perform_login(user)
       }.wont_change "User.count"
 
       must_redirect_to root_path
       expect(session[:user_id]).must_equal user.id
-      expect(flash[:notice]).must_equal "Logged in as returning user #{user.username}"
+      expect(flash[:result_text]).must_equal "Logged in as returning user #{user.username}"
     end
 
     it "creates an account for a new user and redirects to the root route" do
@@ -25,8 +24,7 @@ describe UsersController do
       must_redirect_to root_path
       expect(session[:user_id]).must_equal(User.find_by(provider: user.provider,
         uid: user.uid, email: user.email).id)
-        expect(flash[:notice]).must_equal "Logged in as new user #{user.username}"
-
+        expect(flash[:result_text]).must_equal "Logged in as new user #{user.username}"
     end
 
     it "will handle a request with invalid information" do
@@ -35,14 +33,31 @@ describe UsersController do
         perform_login(user)
       }.wont_change "User.count"
 
-      # you can either respond with a bad request or redirect and give a flash notice
-      # Option 1
-      # must_respond_with :bad_request
-
-      # Option 2
       must_redirect_to root_path
-      expect(flash[:error]).must_equal ["Could not create new user account username: [\"can't be blank\"]"]
-      expect(session[:user_id]).must_equal nil
+      expect(flash[:result_text]).must_equal "Could not create new user account. Username can't be blank"
+      expect(session[:user_id]).must_be_nil
+    end
+
+    it "will handle a request with no auth hash" do
+
+      OmniAuth.config.mock_auth[:github] = nil
+      expect {
+        get auth_callback_path(:github)
+      }.wont_differ "User.count", 0
+
+      expect(flash[:result_text]).must_equal "Could not create new user account. Username can't be blank"
+      expect(session[:user_id]).must_be_nil
+
+    end
+
+    it "will redirect back to root_path if auth provider is invalid" do
+      expect {
+        get auth_callback_path(:google)
+      }.wont_differ "User.count", 0
+      must_redirect_to root_path
+      expect(flash[:result_text]).must_equal "Could not log in, google is not a valid provider"
+      expect(session[:user_id]).must_be_nil
+
     end
   end
 
@@ -54,16 +69,16 @@ describe UsersController do
       post logout_path
 
       must_redirect_to root_path
-      expect(session[:user_id]).must_equal nil
-      expect(flash[:notice]).must_equal "Successfully logged out"
+      expect(session[:user_id]).must_be_nil
+      expect(flash[:result_text]).must_equal "Successfully logged out"
     end
 
     it "will redirect back and give a flash notice if a guest user tries to logout" do
       post logout_path
 
       must_redirect_to root_path
-      expect(session[:user_id]).must_equal nil
-      expect(flash[:warning]).must_equal "You were not logged in!"
+      expect(session[:user_id]).must_be_nil
+      expect(flash[:result_text]).must_equal "You were not logged in!"
     end
   end
 end
