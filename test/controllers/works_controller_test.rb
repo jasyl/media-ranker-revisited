@@ -34,13 +34,16 @@ describe WorksController do
   INVALID_CATEGORIES = ["nope", "42", "", "  ", "albumstrailingtext"]
 
   describe "index" do
-    it "succeeds when there are works" do
+    it "succeeds when there are works & user is logged in" do
+
+      perform_login
       get works_path
 
       must_respond_with :success
     end
 
     it "succeeds when there are no works" do
+      perform_login
       Work.all do |work|
         work.destroy
       end
@@ -53,6 +56,7 @@ describe WorksController do
 
   describe "new" do
     it "succeeds" do
+      perform_login
       get new_work_path
 
       must_respond_with :success
@@ -60,6 +64,9 @@ describe WorksController do
   end
 
   describe "create" do
+    before do
+      perform_login
+    end
     it "creates a work with valid data for a real category" do
       new_work = { work: { title: "Dirty Computer", category: "album" } }
 
@@ -96,6 +103,9 @@ describe WorksController do
   end
 
   describe "show" do
+    before do
+      perform_login
+    end
     it "succeeds for an extant work ID" do
       get work_path(existing_work.id)
 
@@ -113,6 +123,9 @@ describe WorksController do
   end
 
   describe "edit" do
+    before do
+      perform_login
+    end
     it "succeeds for an extant work ID" do
       get edit_work_path(existing_work.id)
 
@@ -130,6 +143,9 @@ describe WorksController do
   end
 
   describe "update" do
+    before do
+      perform_login
+    end
     it "succeeds for valid data and an extant work ID" do
       updates = { work: { title: "Dirty Computer" } }
 
@@ -166,6 +182,9 @@ describe WorksController do
   end
 
   describe "destroy" do
+    before do
+      perform_login
+    end
     it "succeeds for an extant work ID" do
       expect {
         delete work_path(existing_work.id)
