@@ -50,11 +50,14 @@ describe UsersController do
 
     end
 
-    it "will handle a request with and invalid auth provider" do
-      user = User.new(provider: "github", uid: 99999, username: "test_user", email: "test@user.com")
+    it "will redirect back to root_path if auth provider is invalid" do
+      expect {
+        get auth_callback_path(:google)
+      }.wont_differ "User.count", 0
+      must_redirect_to root_path
+      expect(flash[:result_text]).must_equal "Could not log in, google is not a valid provider"
+      expect(session[:user_id]).must_be_nil
 
-      OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-      get auth_callback_path(:google)
     end
   end
 
