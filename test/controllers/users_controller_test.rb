@@ -25,7 +25,6 @@ describe UsersController do
       expect(session[:user_id]).must_equal(User.find_by(provider: user.provider,
         uid: user.uid, email: user.email).id)
         expect(flash[:result_text]).must_equal "Logged in as new user #{user.username}"
-
     end
 
     it "will handle a request with invalid information" do
@@ -37,6 +36,25 @@ describe UsersController do
       must_redirect_to root_path
       expect(flash[:result_text]).must_equal "Could not create new user account. Username can't be blank"
       expect(session[:user_id]).must_be_nil
+    end
+
+    it "will handle a request with no auth hash" do
+
+      OmniAuth.config.mock_auth[:github] = nil
+      expect {
+        get auth_callback_path(:github)
+      }.wont_differ "User.count", 0
+
+      expect(flash[:result_text]).must_equal "Could not create new user account. Username can't be blank"
+      expect(session[:user_id]).must_be_nil
+
+    end
+
+    it "will handle a request with and invalid auth provider" do
+      user = User.new(provider: "github", uid: 99999, username: "test_user", email: "test@user.com")
+
+      OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+      get auth_callback_path(:google)
     end
   end
 
