@@ -98,6 +98,8 @@ GEM
       railties (>= 3.2)
     erubi (1.10.0)
     execjs (2.7.0)
+    faker (2.15.1)
+      i18n (>= 1.6, < 2)
     faraday (1.1.0)
       multipart-post (>= 1.2, < 3)
       ruby2_keywords
@@ -301,6 +303,7 @@ DEPENDENCIES
   capybara (>= 2.15)
   debase (>= 0.2.4.1)
   dotenv-rails
+  faker
   guard
   guard-minitest
   jbuilder (~> 2.7)
