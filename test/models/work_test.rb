@@ -23,7 +23,7 @@ describe Work do
     it "allows the three valid categories" do
       valid_categories = ["album", "book", "movie"]
       valid_categories.each do |category|
-        work = Work.new(title: "test", category: category)
+        work = Work.new(title: "test", category: category, user_id: users(:dan).id)
         expect(work.valid?).must_equal true
       end
     end
@@ -31,7 +31,7 @@ describe Work do
     it "fixes almost-valid categories" do
       categories = ["Album", "albums", "ALBUMS", "books", "mOvIeS"]
       categories.each do |category|
-        work = Work.new(title: "test", category: category)
+        work = Work.new(title: "test", category: category, user_id: users(:dan).id)
         expect(work.valid?).must_equal true
         expect(work.category).must_equal category.singularize.downcase
       end
@@ -40,14 +40,14 @@ describe Work do
     it "rejects invalid categories" do
       invalid_categories = ["cat", "dog", "phd thesis", 1337, nil]
       invalid_categories.each do |category|
-        work = Work.new(title: "test", category: category)
+        work = Work.new(title: "test", category: category, user_id: users(:dan).id)
         expect(work.valid?).must_equal false
         expect(work.errors.messages).must_include :category
       end
     end
 
     it "requires a title" do
-      work = Work.new(category: "ablum")
+      work = Work.new(category: "ablum", user_id: users(:dan).id)
       expect(work.valid?).must_equal false
       expect(work.errors.messages).must_include :title
     end
@@ -55,35 +55,35 @@ describe Work do
     it "requires unique names w/in categories" do
       category = "album"
       title = "test title"
-      work1 = Work.new(title: title, category: category)
+      work1 = Work.new(title: title, category: category, user_id: users(:dan).id)
       work1.save!
 
-      work2 = Work.new(title: title, category: category)
+      work2 = Work.new(title: title, category: category, user_id: users(:dan).id)
       expect(work2.valid?).must_equal false
       expect(work2.errors.messages).must_include :title
     end
 
     it "does not require a unique name if the category is different" do
       title = "test title"
-      work1 = Work.new(title: title, category: "album")
+      work1 = Work.new(title: title, category: "album", user_id: users(:dan).id)
       work1.save!
 
-      work2 = Work.new(title: title, category: "book")
+      work2 = Work.new(title: title, category: "book", user_id: users(:dan).id)
       expect(work2.valid?).must_equal true
     end
   end
 
   describe "vote_count" do
     it "defaults to 0" do
-      work = Work.create!(title: "test title", category: "movie")
+      work = Work.create!(title: "test title", category: "movie", user_id: users(:dan).id)
       expect(work).must_respond_to :vote_count
       expect(work.vote_count).must_equal 0
     end
 
     it "tracks the number of votes" do
-      work = Work.create!(title: "test title", category: "movie")
+      work = Work.create!(title: "test title", category: "movie", user_id: users(:dan).id)
       4.times do |i|
-        user = User.create!(username: "user#{i}")
+        user = User.all[i]
         Vote.create!(user: user, work: work)
       end
       expect(work.vote_count).must_equal 4
@@ -93,17 +93,14 @@ describe Work do
 
   describe "top_ten" do
     before do
-      # TODO DPR: This runs pretty slow. Fixtures?
-      # Create users to do the voting
+
       test_users = []
-      20.times do |i|
-        test_users << User.create!(username: "user#{i}")
-      end
+      User.all.each {|user| test_users << user}
 
       # Create media to vote upon
       Work.where(category: "movie").destroy_all
       8.times do |i|
-        work = Work.create!(category: "movie", title: "test movie #{i}")
+        work = Work.create!(category: "movie", title: "test movie #{i}", user_id: users(:dan).id)
         vote_count = rand(test_users.length)
         test_users.first(vote_count).each do |user|
           Vote.create!(work: work, user: user)
@@ -133,13 +130,13 @@ describe Work do
       movies = Work.top_ten("movie")
       expect(movies.length).must_equal 8
 
-      Work.create(title: "phase 2 test movie 1", category: "movie")
+      Work.create(title: "phase 2 test movie 1", category: "movie", user_id: users(:dan).id)
       expect(Work.top_ten("movie").length).must_equal 9
 
-      Work.create(title: "phase 2 test movie 2", category: "movie")
+      Work.create(title: "phase 2 test movie 2", category: "movie", user_id: users(:dan).id)
       expect(Work.top_ten("movie").length).must_equal 10
 
-      Work.create(title: "phase 2 test movie 3", category: "movie")
+      Work.create(title: "phase 2 test movie 3", category: "movie", user_id: users(:dan).id)
       expect(Work.top_ten("movie").length).must_equal 10
     end
   end
