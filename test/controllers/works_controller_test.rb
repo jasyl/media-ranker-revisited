@@ -127,7 +127,11 @@ describe WorksController do
       perform_login
     end
     it "succeeds for an extant work ID" do
-      get edit_work_path(existing_work.id)
+      user = User.find_by(id: session[:user_id])
+      work = Work.new(title: "test title", category: "albums")
+      work.user_id = user.id
+      work.save!
+      get edit_work_path(work.id)
 
       must_respond_with :success
     end
@@ -147,26 +151,34 @@ describe WorksController do
       perform_login
     end
     it "succeeds for valid data and an extant work ID" do
+      user = User.find_by(id: session[:user_id])
+      work = Work.new(title: "test title", category: "albums")
+      work.user_id = user.id
+      work.save!
       updates = { work: { title: "Dirty Computer" } }
 
       expect {
-        put work_path(existing_work), params: updates
+        put work_path(work), params: updates
       }.wont_change "Work.count"
-      updated_work = Work.find_by(id: existing_work.id)
+      updated_work = Work.find_by(id: work.id)
 
       expect(updated_work.title).must_equal "Dirty Computer"
       must_respond_with :redirect
-      must_redirect_to work_path(existing_work.id)
+      must_redirect_to work_path(work.id)
     end
 
     it "renders bad_request for bogus data" do
+      user = User.find_by(id: session[:user_id])
+      work = Work.new(title: "test title", category: "albums")
+      work.user_id = user.id
+      work.save!
       updates = { work: { title: nil } }
 
       expect {
-        put work_path(existing_work), params: updates
+        put work_path(work), params: updates
       }.wont_change "Work.count"
 
-      work = Work.find_by(id: existing_work.id)
+      work = Work.find_by(id: work.id)
 
       must_respond_with :not_found
     end
@@ -186,8 +198,12 @@ describe WorksController do
       perform_login
     end
     it "succeeds for an extant work ID" do
+      user = User.find_by(id: session[:user_id])
+      work = Work.new(title: "test title", category: "albums")
+      work.user_id = user.id
+      work.save!
       expect {
-        delete work_path(existing_work.id)
+        delete work_path(work.id)
       }.must_change "Work.count", -1
 
       must_respond_with :redirect
