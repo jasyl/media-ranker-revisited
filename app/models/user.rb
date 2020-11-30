@@ -7,12 +7,12 @@ class User < ApplicationRecord
 
 
 
-  def self.build_from_github(auth_hash)
+  def self.build_from_oauth(auth_hash)
     user = User.new
     user.uid = auth_hash["uid"]
-    user.username = auth_hash["info"]["nickname"]
+    user.username = auth_hash["info"]["name"]
     user.email = auth_hash["info"]["email"]
-    user.provider = "github"
+    user.provider = auth_hash["provider"]
     user.avatar = auth_hash["info"]["image"]
     return user
   end

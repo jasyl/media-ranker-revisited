@@ -2,6 +2,8 @@ class WorksController < ApplicationController
   # We should always be able to tell what category
   # of work we're dealing with
   before_action :category_from_work, except: [:root, :index, :new, :create]
+  before_action :require_login, except: [:root, :upvote]
+  before_action :check_authorization, only: [:edit, :update, :destroy]
 
   def root
     @albums = Work.best_albums
@@ -20,6 +22,8 @@ class WorksController < ApplicationController
 
   def create
     @work = Work.new(media_params)
+    @user = User.find_by(id: session[:user_id])
+    @work.user_id = @user.id
     @media_category = @work.category
     if @work.save
       flash[:status] = :success
@@ -90,5 +94,13 @@ class WorksController < ApplicationController
     @work = Work.find_by(id: params[:id])
     return render_404 unless @work
     @media_category = @work.category.downcase.pluralize
+  end
+
+  def check_authorization
+    if session[:user_id] != @work.user_id
+      flash[:status] = :failure
+      flash[:result_text] = "You are not the owner of this work, you are not allowed to make changes"
+      return redirect_back fallback_location: work_path(@work)
+    end
   end
 end
