@@ -10,7 +10,7 @@ require "csv"
 # $ rails db:reset
 # doesn't currently check for if titles are unique against each other
 
-CSV.open("db/media_seeds.csv", "w", :write_headers => true,
+CSV.open("media_seeds.csv", "w", :write_headers => true,
                                     :headers => ["category", "title", "creator", "publication_year", "description"]) do |csv|
   25.times do
     category = %w(album book).sample
@@ -22,3 +22,16 @@ CSV.open("db/media_seeds.csv", "w", :write_headers => true,
     csv << [category, title, creator, publication_year, description]
   end
 end
+
+CSV.open("users_seeds.csv", "w", :write_headers => true,
+         :headers => ["username", "provider", "uid", "email"]) do |csv|
+  10.times do
+    username = Faker::Internet.username
+    provider = %w(github google).sample
+    uid = Faker::Internet.uuid
+    email = Faker::Internet.email
+
+    csv << [username, provider, uid, email]
+  end
+end
+
