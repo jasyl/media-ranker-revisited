@@ -87,3 +87,5 @@ end
 gem 'omniauth'
 gem 'omniauth-github'
 gem 'omniauth-google-oauth2'
+
+gem 'faker'
