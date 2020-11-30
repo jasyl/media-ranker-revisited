@@ -25,22 +25,27 @@ class ActiveSupport::TestCase
   end
 
   def mock_auth_hash(user)
-    return {
-      provider: user.provider,
-      uid: user.uid,
-      info: {
-        email: user.email,
-        nickname: user.username,
-        image: user.avatar
-      }
+    auth_hash = {
+        provider: user.provider,
+        uid: user.uid,
+        info: {
+            email: user.email,
+            image: user.avatar
+        }
     }
+    if user.provider == "github"
+      auth_hash[:info][:nickname] = user.username
+    elsif user.provider == "google_oauth2"
+      auth_hash[:info][:name] = user.username
+    end
+    return auth_hash
   end
 
   def perform_login(user = nil)
     user ||= User.first
 
-    OmniAuth.config.mock_auth[:github] = OmniAuth::AuthHash.new(mock_auth_hash(user))
-    get auth_callback_path(:github)
+    OmniAuth.config.mock_auth[user.provider.to_sym] = OmniAuth::AuthHash.new(mock_auth_hash(user))
+    get auth_callback_path(user.provider.to_sym)
 
     return user
   end
